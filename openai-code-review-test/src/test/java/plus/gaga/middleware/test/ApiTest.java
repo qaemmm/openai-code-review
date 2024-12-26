@@ -1,7 +1,8 @@
 package plus.gaga.middleware.test;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -13,7 +14,9 @@ public class ApiTest {
 
     @Test
     public void test() {
-        System.out.println(Integer.parseInt("aaaa"));
+        System.out.println(Integer.parseInt("aaaa1"));
+        System.out.println(Integer.parseInt("aaaa2"));
+        System.out.println(Integer.parseInt("aaaa3"));
     }
 
 }
