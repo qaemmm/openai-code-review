@@ -7,7 +7,8 @@ import plus.gaga.middleware.sdk.domain.model.ChatCompletionRequest;
 import plus.gaga.middleware.sdk.domain.model.ChatCompletionSyncResponse;
 import plus.gaga.middleware.sdk.domain.model.Model;
 import plus.gaga.middleware.sdk.types.utils.BearerTokenUtils;
-
+import plus.gaga.middleware.sdk.types.utils.WXAccessTokenUtils;
+import plus.gaga.middleware.sdk.domain.model.Message;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -16,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Random;
+import java.util.Scanner;
 
 /**
  * 整一个流程大致是git diff HEAD~1 HEAD --前一版的代码和当前的代码变化，
@@ -55,10 +57,55 @@ public class OpenAiCodeReview {
         // 3. 写入评审日志
         String logUrl  = writeLog(token, log);
         System.out.println("writeLog：" + logUrl);
+
+        // 4. 消息通知
+        System.out.println("pushMessage：" + logUrl);
+        sendMessage(logUrl);
+
     }
 
 
+    private static void sendMessage(String logUrl){
+        String accessToken = WXAccessTokenUtils.getAccessToken();
+        System.out.println("accessToken:"+accessToken);
+        Message message = new Message();
+        message.put("project", "big-market");
+        message.put("review", logUrl);
+        message.setUrl(logUrl);
 
+        String url = String.format("https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=%s", accessToken);
+        sendPostRequest(url, JSON.toJSONString(message));
+
+    }
+    //2、发送消息
+    // POST https://api.weixin.qq.com/cgi-bin/message/template/send
+    // access_token=ACCESS_TOKEN
+    private static void sendPostRequest(String urlString,String jsonBody){
+        try{
+            URL url = new URL(urlString);
+            HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type", "application/json; utf-8");
+            connection.setRequestProperty("Accept", "application/json");
+            connection.setDoOutput(true);
+
+            try(OutputStream os =connection.getOutputStream()){
+                byte[] bytes = jsonBody.getBytes(StandardCharsets.UTF_8);
+                os.write(bytes,0,bytes.length);
+            }
+
+            try(Scanner scanner = new Scanner(connection.getInputStream(),StandardCharsets.UTF_8.name())){
+                String response = scanner.useDelimiter("\\A").next();
+                System.out.println(response);
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+
+    // 代码评审
     public static String codeReview (String code)throws  Exception{
         String apiKeySecret = "";
         String token = BearerTokenUtils.getToken(apiKeySecret);
@@ -111,6 +158,7 @@ public class OpenAiCodeReview {
 
     }
 
+    //编写评审日志
     private static String writeLog(String token,String log)throws Exception{
         Git git = Git.cloneRepository()
                 .setURI("")
