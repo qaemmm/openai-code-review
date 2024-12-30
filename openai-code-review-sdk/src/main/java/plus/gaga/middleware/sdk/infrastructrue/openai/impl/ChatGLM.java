@@ -28,7 +28,7 @@ public class ChatGLM implements IOpenAI {
     //操作glm需要地址和秘钥key
     @Override
     public ChatCompletionSyncResponseDTO completions(ChatCompletionRequestDTO requestDTO) throws Exception {
-        String token = BearerTokenUtils.getToken(apiHost, apiKeySecret);
+        String token = BearerTokenUtils.getToken( apiKeySecret);
 
         URL url = new URL(apiHost);
         HttpURLConnection connection =(HttpURLConnection) url.openConnection();
