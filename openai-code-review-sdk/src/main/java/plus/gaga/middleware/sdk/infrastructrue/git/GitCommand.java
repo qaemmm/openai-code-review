@@ -40,38 +40,35 @@ public class GitCommand {
     }
     //查看当前不同的
     public String diff()throws Exception{
-        // openai.itedus.cn
-        ProcessBuilder logProcessBuilder = new ProcessBuilder("git", "log", "-1", "--pretty=format:%H");
-        logProcessBuilder.directory(new File("."));
+        ProcessBuilder logProcessBuilder = new ProcessBuilder("git","diff","-1","--pretty=format:%H");
         Process logProcess = logProcessBuilder.start();
-
+        //去查看提交记录不一样的东西
         BufferedReader logReader = new BufferedReader(new InputStreamReader(logProcess.getInputStream()));
-        String latestCommitHash = logReader.readLine();
+        String lastCommitHash = logReader.readLine();
         logReader.close();
         logProcess.waitFor();
-
-        ProcessBuilder diffProcessBuilder = new ProcessBuilder("git", "diff", latestCommitHash + "^", latestCommitHash);
-        diffProcessBuilder.directory(new File("."));
+        ProcessBuilder diffProcessBuilder = new ProcessBuilder("git","diff",lastCommitHash+"^",lastCommitHash);
         Process diffProcess = diffProcessBuilder.start();
-
-        StringBuilder diffCode = new StringBuilder();
+        //现在就是读取到了diff的差异化数据
+        StringBuilder sb = new StringBuilder();
         BufferedReader diffReader = new BufferedReader(new InputStreamReader(diffProcess.getInputStream()));
-        String line;
-        while ((line = diffReader.readLine()) != null) {
-            diffCode.append(line).append("\n");
+        String inputLine ;
+        while((inputLine=diffReader.readLine())!=null){
+            sb.append(inputLine);
         }
         diffReader.close();
+        int diffCode = diffProcess.waitFor();
 
-        int exitCode = diffProcess.waitFor();
-        if (exitCode != 0) {
-            throw new RuntimeException("Failed to get diff, exit code:" + exitCode);
+        if(diffCode!=0){
+            throw new RuntimeException("diff命令执行失败");
         }
 
-        return diffCode.toString();
+
+        return sb.toString();
     }
 
-
     public String commitAndPush(String recommend)throws Exception{
+        logger.info(githubReviewLogUri+".git");
         //通过java来操作git命令完成commit和push操作
         Git git = Git.cloneRepository()
                 .setURI(githubReviewLogUri+".git")
@@ -88,6 +85,7 @@ public class GitCommand {
         }
 
         String fileName = dateFolderName+"/"+project+"_"+branch+"_"+author+"_"+System.currentTimeMillis()+"-"+ RandomStringUtils.randomNumeric(4)+".md";
+        logger.info("open-ai-review git commit and push fileName:{}",fileName);
         //创建一个某个目录下的文件
         File newFile = new File(dateFolderName,fileName);
         //传过来的命令行进行写入
