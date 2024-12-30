@@ -9,9 +9,6 @@ import plus.gaga.middleware.sdk.infrastructrue.openai.IOpenAI;
 import plus.gaga.middleware.sdk.infrastructrue.openai.impl.ChatGLM;
 import plus.gaga.middleware.sdk.infrastructrue.weixin.WeiXin;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-
 /**
  * 整一个流程大致是git diff HEAD~1 HEAD --前一版的代码和当前的代码变化，
  * 然后调用glm大模型，构建请求参数和响应结果，选择合适的model模型，然后设置prompt作为一个高级开发，对如下的这个内容怎么看？
