@@ -6,10 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import plus.gaga.middleware.sdk.types.utils.RandomStringUtils;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -39,33 +36,38 @@ public class GitCommand {
 
     }
     //查看当前不同的
-    public String diff()throws Exception{
-        ProcessBuilder logProcessBuilder = new ProcessBuilder("git","diff","-1","--pretty=format:%H");
+
+    public String diff() throws  InterruptedException, IOException {
+        // openai.itedus.cn
+        ProcessBuilder logProcessBuilder = new ProcessBuilder("git", "log", "-1", "--pretty=format:%H");
+        logProcessBuilder.directory(new File("."));
         Process logProcess = logProcessBuilder.start();
-        //去查看提交记录不一样的东西
+
         BufferedReader logReader = new BufferedReader(new InputStreamReader(logProcess.getInputStream()));
-        String lastCommitHash = logReader.readLine();
+        String latestCommitHash = logReader.readLine();
         logReader.close();
         logProcess.waitFor();
-        ProcessBuilder diffProcessBuilder = new ProcessBuilder("git","diff",lastCommitHash+"^",lastCommitHash);
+
+        ProcessBuilder diffProcessBuilder = new ProcessBuilder("git", "diff", latestCommitHash + "^", latestCommitHash);
+        diffProcessBuilder.directory(new File("."));
         Process diffProcess = diffProcessBuilder.start();
-        //现在就是读取到了diff的差异化数据
-        StringBuilder sb = new StringBuilder();
+
+        StringBuilder diffCode = new StringBuilder();
         BufferedReader diffReader = new BufferedReader(new InputStreamReader(diffProcess.getInputStream()));
-        String inputLine ;
-        while((inputLine=diffReader.readLine())!=null){
-            sb.append(inputLine);
+        String line;
+        while ((line = diffReader.readLine()) != null) {
+            diffCode.append(line).append("\n");
         }
         diffReader.close();
-        int diffCode = diffProcess.waitFor();
 
-        if(diffCode!=0){
-            throw new RuntimeException("diff命令执行失败");
+        int exitCode = diffProcess.waitFor();
+        if (exitCode != 0) {
+            throw new RuntimeException("Failed to get diff, exit code:" + exitCode);
         }
 
-
-        return sb.toString();
+        return diffCode.toString();
     }
+
 
     public String commitAndPush(String recommend)throws Exception{
         logger.info(githubReviewLogUri+".git");
