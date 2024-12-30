@@ -49,9 +49,9 @@ public class ApiTest {
 //        }
 //    }
 //
-//    @Test
-//    public void test_chatglm(){
-//        String token = BearerTokenUtils.getToken("dcacdd5f69824f4909e278cb3ac175a1.tV8KJedMqQNUKXhd");
-//        System.out.println(token);
-//    }
+    @Test
+    public void test_chatglm(){
+        String token = BearerTokenUtils.getToken("dcacdd5f69824f4909e278cb3ac175a1.tV8KJedMqQNUKXhd");
+        System.out.println(token);
+    }
 }
