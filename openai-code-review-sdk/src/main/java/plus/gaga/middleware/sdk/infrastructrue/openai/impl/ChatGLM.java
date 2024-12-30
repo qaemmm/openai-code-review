@@ -7,6 +7,7 @@ import plus.gaga.middleware.sdk.infrastructrue.openai.dto.ChatCompletionSyncResp
 import plus.gaga.middleware.sdk.types.utils.BearerTokenUtils;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -41,14 +42,31 @@ public class ChatGLM implements IOpenAI {
             os.write(bytes,0,bytes.length);
         }
 
-        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        String inputLine;
-        StringBuilder sb = new StringBuilder();
-        while((inputLine = in.readLine())!=null){
-            sb.append(inputLine);
+        try {
+            int responseCode = connection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) { // 成功
+                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String inputLine;
+                StringBuilder sb = new StringBuilder();
+                while ((inputLine = in.readLine()) != null) {
+                    sb.append(inputLine);
+                }
+                in.close();
+                return JSON.parseObject(sb.toString(), ChatCompletionSyncResponseDTO.class);
+            } else {
+                // 错误响应
+                BufferedReader errorStream = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+                String errorLine;
+                StringBuilder errorSb = new StringBuilder();
+                while ((errorLine = errorStream.readLine()) != null) {
+                    errorSb.append(errorLine);
+                }
+                errorStream.close();
+                throw new RuntimeException("Server returned HTTP response code: " + responseCode + ", message: " + errorSb.toString());
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Error occurred during API call", e);
         }
-        in.close();
-        connection.disconnect();
-        return JSON.parseObject(sb.toString(), ChatCompletionSyncResponseDTO.class);
+
     }
 }
