@@ -16,10 +16,8 @@ public class ApiTest {
     public void test() {
         System.out.println("aaaa1");
         System.out.println("aaaa2");
-        System.out.println("aaaa3");
-        System.out.println("aaaa4");
-        System.out.println("aaaa5");
-        System.out.println("aaaa6");
+        System.out.println(Integer.parseInt("aaaa22"));
+
     }
 
 }
