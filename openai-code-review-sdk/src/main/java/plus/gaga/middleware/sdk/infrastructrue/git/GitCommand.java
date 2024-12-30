@@ -70,42 +70,35 @@ public class GitCommand {
 
 
     public String commitAndPush(String recommend)throws Exception{
-        logger.info(githubReviewLogUri+".git");
-        //通过java来操作git命令完成commit和push操作
         Git git = Git.cloneRepository()
-                .setURI(githubReviewLogUri+".git")
+                .setURI(githubReviewLogUri + ".git")
                 .setDirectory(new File("repo"))
-                .setCredentialsProvider(new UsernamePasswordCredentialsProvider(githubToken,""))
-                .call()
-                ;
+                .setCredentialsProvider(new UsernamePasswordCredentialsProvider(githubToken, ""))
+                .call();
 
-        //创建分支
+        // 创建分支
         String dateFolderName = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-        File dateFolder = new File("repo/"+dateFolderName);
-        if (!dateFolder.exists()){
+        File dateFolder = new File("repo/" + dateFolderName);
+        if (!dateFolder.exists()) {
             dateFolder.mkdirs();
         }
 
-        String fileName = dateFolderName+"/"+project+"_"+branch+"_"+author+"_"+System.currentTimeMillis()+"-"+ RandomStringUtils.randomNumeric(4)+".md";
-        logger.info("open-ai-review git commit and push fileName:{}",fileName);
-        //创建一个某个目录下的文件
-        File newFile = new File(dateFolderName,fileName);
-        //传过来的命令行进行写入
-        try(FileWriter writer = new FileWriter(newFile)){
+        String fileName = project + "-" + branch + "-" + author + System.currentTimeMillis() + "-" + RandomStringUtils.randomNumeric(4) + ".md";
+        File newFile = new File(dateFolder, fileName);
+        try (FileWriter writer = new FileWriter(newFile)) {
             writer.write(recommend);
         }
 
-        git.add().addFilepattern(dateFolderName+"/"+fileName).call();
+        // 提交内容
+        git.add().addFilepattern(dateFolderName + "/" + fileName).call();
+        git.commit().setMessage("add code review new file" + fileName).call();
+        git.push().setCredentialsProvider(new UsernamePasswordCredentialsProvider(githubToken, "")).call();
 
-        git.commit().setMessage("add code review new file"+fileName).call();
+        logger.info("openai-code-review git commit and push done! {}", fileName);
 
-        git.push().setCredentialsProvider(new UsernamePasswordCredentialsProvider(githubToken,""));
-
-        logger.info("open-ai-review git commit and push done!{}",fileName);
-
-        return githubReviewLogUri+"/blob/master"+dateFolderName+"/"+fileName;
-
+        return githubReviewLogUri + "/blob/master/" + dateFolderName + "/" + fileName;
     }
+
 
 
     public String getMessage() {
