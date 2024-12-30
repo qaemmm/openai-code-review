@@ -32,7 +32,7 @@ public class ChatGLM implements IOpenAI {
         URL url = new URL(apiHost);
         HttpURLConnection connection =(HttpURLConnection) url.openConnection();
         connection.setRequestMethod("POST");
-        connection.setRequestProperty("authorization","Bearer"+token);
+        connection.setRequestProperty("authorization","Bearer "+token);
         connection.setRequestProperty("Content-Type","application/json");
         connection.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
         connection.setDoOutput(true);
