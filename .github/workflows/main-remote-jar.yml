@@ -3,10 +3,10 @@ name: Build and Run OpenAlCodeReview By Main Maven Jar
 on:
   push:
     branches:
-      - main-close
+      - main
   pull_request:
     branches:
-      - main-close
+      - main
 
 jobs:
   build:
@@ -24,11 +24,11 @@ jobs:
           distribution: 'temurin'  # 你可以选择其他发行版，如 'adopt' 或 'zulu'
           java-version: '8'
 
-      - name: Build with Maven
-        run: mvn clean install
+      - name: Create libs directory
+        run: mkdir -p ./libs
 
-      - name: Copy openai-code-review-sdk JAR
-        run: mvn dependency:copy -Dartifact=plus.gaga.middleware:openai-code-review-sdk:1.0 -DoutputDirectory=./libs
+      - name: Download openai-code-review-sdk JAR
+        run: wget -O ./libs/openai-code-review-sdk-1.0.jar https://github.com/qaemmm/openai-code-review-log/releases/download/v1.0/openai-code-review-sdk-1.0.jar
 
       - name: Get repository name
         id: repo-name
