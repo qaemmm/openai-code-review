@@ -17,6 +17,8 @@ public class ApiTest {
         System.out.println(1 / 0);
         System.out.println(Integer.parseInt("aaaa211112"));
         System.out.println(Integer.parseInt("aaaa211112"));
+        System.out.println(Integer.parseInt("aaa232a211112"));
+        System.out.println(Integer.parseInt("aaaa211123212"));
         System.out.println(Integer.parseInt("aaaaZXX21132112"));
             }
 }
