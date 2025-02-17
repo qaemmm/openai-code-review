@@ -70,49 +70,35 @@ public class GitCommand {
 
 
     public String commitAndPush(String recommend) throws Exception {
-        logger.info(githubReviewLogUri + ".git");
-
-        // 通过 Java 操作 git 命令完成 commit 和 push 操作
         Git git = Git.cloneRepository()
                 .setURI(githubReviewLogUri + ".git")
-                .setDirectory(new File("repo"))  // 克隆到 repo 目录
+                .setDirectory(new File("repo"))
                 .setCredentialsProvider(new UsernamePasswordCredentialsProvider(githubToken, ""))
                 .call();
 
-        // 创建分支和目录
+        // 创建分支
         String dateFolderName = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-        File repoDir = new File("repo");
-        File dateFolder = new File(repoDir, dateFolderName);
+        File dateFolder = new File("repo/" + dateFolderName);
         if (!dateFolder.exists()) {
-            dateFolder.mkdirs();  // 如果目录不存在则创建
+            dateFolder.mkdirs();
         }
 
-        String fileName = dateFolderName + "/" + project + "_" + branch + "_" + author + "_"
-                + System.currentTimeMillis() + "-" + RandomStringUtils.randomNumeric(4) + ".md";
-        logger.info("open-ai-review git commit and push fileName:{}", fileName);
-
-        // 创建文件
+        String fileName = project + "-" + branch + "-" + author + System.currentTimeMillis() + "-" + RandomStringUtils.randomNumeric(4) + ".md";
         File newFile = new File(dateFolder, fileName);
-
-        // 写入文件
         try (FileWriter writer = new FileWriter(newFile)) {
             writer.write(recommend);
         }
 
-        // 添加文件到 git
+        // 提交内容
         git.add().addFilepattern(dateFolderName + "/" + fileName).call();
-
-        // 提交更改
-        git.commit().setMessage("add code review new file " + fileName).call();
-
-        // 推送到远程仓库
+        git.commit().setMessage("add code review new file" + fileName).call();
         git.push().setCredentialsProvider(new UsernamePasswordCredentialsProvider(githubToken, "")).call();
 
-        logger.info("open-ai-review git commit and push done!{}", fileName);
+        logger.info("openai-code-review git commit and push done! {}", fileName);
 
-        // 返回 GitHub 上的文件 URL
         return githubReviewLogUri + "/blob/master/" + dateFolderName + "/" + fileName;
     }
+
 
 
 
