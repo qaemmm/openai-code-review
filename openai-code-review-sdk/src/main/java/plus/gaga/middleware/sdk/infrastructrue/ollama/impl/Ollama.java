@@ -2,6 +2,8 @@ package plus.gaga.middleware.sdk.infrastructrue.ollama.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.util.UriComponentsBuilder;
 import plus.gaga.middleware.sdk.infrastructrue.ollama.IOllama;
 
 import java.io.BufferedReader;
@@ -14,8 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 //@Service
+@Slf4j
 public class Ollama implements IOllama {
-
     private final String OLLAMA_API_URL = "http://localhost:8090/api/v1/ollama/generate_stream_rag";
     private final ObjectMapper objectMapper;
     private static final int MAX_RETRIES = 3;
@@ -26,97 +28,129 @@ public class Ollama implements IOllama {
         this.objectMapper = new ObjectMapper();
     }
 
-    @Override
     public String generateStreamRag(String model, String ragTag, String message) {
+        log.info("Generating stream Rag begin with model: {}, ragTag: {}, message: {}", model, ragTag, message);
         StringBuilder contentBuilder = new StringBuilder();
         int retryCount = 0;
         Exception lastException = null;
 
         while (retryCount < MAX_RETRIES) {
             try {
-                // 构建URL with parameters
-                String encodedModel = URLEncoder.encode(model, StandardCharsets.UTF_8.toString());
-                String encodedRagTag = URLEncoder.encode(ragTag, StandardCharsets.UTF_8.toString());
-                String encodedMessage = URLEncoder.encode(message, StandardCharsets.UTF_8.toString());
-                String urlString = String.format("%s?model=%s&ragTag=%s&message=%s",
-                        OLLAMA_API_URL, encodedModel, encodedRagTag, encodedMessage);
+                String urlString = UriComponentsBuilder.fromHttpUrl(OLLAMA_API_URL)
+                        .queryParam("model", model)
+                        .queryParam("ragTag", ragTag)
+                        .queryParam("message", message)
+                        .toUriString();
+
+                log.info("Requesting URL: {}", urlString);
 
                 URL url = new URL(urlString);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                
-                // 设置连接参数
+
                 conn.setRequestMethod("GET");
                 conn.setConnectTimeout(CONNECT_TIMEOUT);
                 conn.setReadTimeout(READ_TIMEOUT);
-                conn.setRequestProperty("Accept", "application/json");
-                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestProperty("Accept", "text/event-stream");
+                conn.setRequestProperty("Cache-Control", "no-cache");
+                conn.setRequestProperty("Connection", "keep-alive");
 
-                // 检查响应码
                 int responseCode = conn.getResponseCode();
+                log.info("Response code: {}", responseCode);
+
                 if (responseCode != HttpURLConnection.HTTP_OK) {
-                    throw new RuntimeException("Server returned error code: " + responseCode);
+                    String errorMessage = readErrorStream(conn);
+                    log.error("Error response: {}", errorMessage);
+                    throw new RuntimeException("Server returned error code: " + responseCode + ", message: " + errorMessage);
                 }
 
-                // 读取响应
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
                     String line;
+                    log.info("Starting to read response stream...");
+
                     while ((line = reader.readLine()) != null) {
-                        if (!line.trim().isEmpty()) {
+                        log.info("Raw line received: {}", line);
+
+                        if (line.trim().isEmpty()) {
+                            continue;
+                        }
+
+                        if (line.startsWith("data:")) {
+
+                            String jsonData = line.substring(5);
+                            log.info("Processing SSE data: {}", jsonData);
+
                             try {
-                                JsonNode resultNode = objectMapper.readTree(line);
+                                JsonNode resultNode = objectMapper.readTree(jsonData);
                                 JsonNode outputNode = resultNode.path("result").path("output");
                                 String content = outputNode.path("content").asText("");
 
-                                if (!content.isEmpty()) {
+                                log.info("Extracted content: {}", content);
 
+                                if (!content.isEmpty()) {
                                     contentBuilder.append(content);
+                                    log.info("Current accumulated content: {}", contentBuilder);
                                 }
 
-                                // 检查是否结束
                                 String finishReason = resultNode.path("result").path("metadata").path("finishReason").asText();
-                                if ("unknown".equals(finishReason)) {
+                                log.info("Finish reason: {}", finishReason);
+
+                                if ("STOP".equals(finishReason)) {
+                                    log.info("Stream completed with STOP reason");
                                     break;
                                 }
                             } catch (Exception e) {
-                                System.err.println("Warning: Failed to process line: " + line);
-                                e.printStackTrace();
-                                // 继续处理下一行，而不是中断整个过程
+                                log.error("Error parsing SSE data: {}", jsonData, e);
+                                throw e;
                             }
                         }
                     }
-                } finally {
-                    conn.disconnect();
+                    log.info("Finished reading response stream");
                 }
 
-                // 如果成功处理，跳出重试循环
+                conn.disconnect();
                 break;
 
             } catch (Exception e) {
                 lastException = e;
                 retryCount++;
+                log.error("Error in attempt {}: {}", retryCount, e.getMessage(), e);
+
                 if (retryCount < MAX_RETRIES) {
-                    // 等待一段时间后重试
                     try {
-                        Thread.sleep(1000 * retryCount); // 递增等待时间
+                        Thread.sleep(1000 * retryCount);
                     } catch (InterruptedException ie) {
                         Thread.currentThread().interrupt();
                         throw new RuntimeException("Interrupted during retry wait", ie);
                     }
-                    System.err.println("Retry attempt " + retryCount + " of " + MAX_RETRIES);
                 }
             }
         }
 
-        // 如果所有重试都失败了
         if (retryCount == MAX_RETRIES && lastException != null) {
             throw new RuntimeException("Failed after " + MAX_RETRIES + " attempts", lastException);
         }
 
-        // 处理返回结果，去掉<think></think>标签
-        return contentBuilder.toString()
-                .replaceAll("<think>\\s*</think>", "") // 移除空的think标签
-                .replaceAll("<think>", "") // 移除开始标签
-                .replaceAll("</think>", "") // 移除结束标签
+        String finalContent = contentBuilder.toString()
+                .replaceAll("<think>\\s*</think>", "")
+                .replaceAll("<think>", "")
+                .replaceAll("</think>", "")
                 .trim();
+
+        log.info("Generating stream Rag over, final content length: {}, content: {}",
+                finalContent.length(), finalContent);
+        return finalContent;
+    }
+
+    private String readErrorStream(HttpURLConnection conn) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getErrorStream(), StandardCharsets.UTF_8))) {
+            StringBuilder error = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                error.append(line);
+            }
+            return error.toString();
+        } catch (Exception e) {
+            return "Could not read error stream: " + e.getMessage();
+        }
     }
 }
