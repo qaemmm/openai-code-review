@@ -1,13 +1,12 @@
 package plus.gaga.middleware.sdk.infrastructrue.ollama.impl;
 
-import org.springframework.ai.chat.ChatResponse;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import plus.gaga.middleware.sdk.infrastructrue.ollama.IOllama;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.web.util.UriComponentsBuilder;
+import plus.gaga.middleware.sdk.infrastructrue.ollama.IOllama;
 
 @Service
 public class Ollama implements IOllama {

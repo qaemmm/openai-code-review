@@ -1,14 +1,8 @@
 package plus.gaga.middleware.sdk.test;
 
 import com.alibaba.fastjson2.JSON;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 import plus.gaga.middleware.sdk.domain.model.Message;
-import plus.gaga.middleware.sdk.infrastructrue.ollama.IOllama;
 import plus.gaga.middleware.sdk.infrastructrue.ollama.impl.Ollama;
 import plus.gaga.middleware.sdk.types.utils.BearerTokenUtils;
 import plus.gaga.middleware.sdk.types.utils.WXAccessTokenUtils;

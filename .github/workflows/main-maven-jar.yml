@@ -3,10 +3,10 @@ name: Build and Run OpenAlCodeReview By Main Maven Jar
 on:
   push:
     branches:
-      - main-close
+      - 250312-gwh-rag
   pull_request:
     branches:
-      - main-close
+      - 250312-gwh-rag
 
 jobs:
   build:

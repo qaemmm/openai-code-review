@@ -1,16 +1,12 @@
 package plus.gaga.middleware.sdk.domain.service.impl;
 
-import plus.gaga.middleware.sdk.domain.model.Model;
 import plus.gaga.middleware.sdk.domain.service.AbstractOpenAiCodeReviewService;
 import plus.gaga.middleware.sdk.infrastructrue.git.GitCommand;
 import plus.gaga.middleware.sdk.infrastructrue.ollama.IOllama;
 import plus.gaga.middleware.sdk.infrastructrue.openai.IOpenAI;
-import plus.gaga.middleware.sdk.infrastructrue.openai.dto.ChatCompletionRequestDTO;
-import plus.gaga.middleware.sdk.infrastructrue.openai.dto.ChatCompletionSyncResponseDTO;
 import plus.gaga.middleware.sdk.infrastructrue.weixin.WeiXin;
 import plus.gaga.middleware.sdk.infrastructrue.weixin.dto.TemplateMessageDTO;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
