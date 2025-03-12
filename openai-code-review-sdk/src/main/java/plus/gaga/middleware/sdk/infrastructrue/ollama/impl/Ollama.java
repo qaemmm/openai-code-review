@@ -8,7 +8,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import plus.gaga.middleware.sdk.infrastructrue.ollama.IOllama;
 
-@Service
+//@Service
 public class Ollama implements IOllama {
 
     private final String OLLAMA_API_URL = "http://localhost:8090/api/v1/ollama/generate_stream";

@@ -13,5 +13,5 @@
 /jarRepositories.xml
 /vcs.xml
 /.idea/
-./openai-code-review-sdk/target/
-./openai-code-review-test/target/
+/openai-code-review-sdk/target/
+/openai-code-review-test/target/
