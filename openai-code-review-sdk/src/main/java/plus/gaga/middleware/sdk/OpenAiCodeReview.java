@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import plus.gaga.middleware.sdk.domain.service.impl.OpenAiCodeReviewService;
 import plus.gaga.middleware.sdk.infrastructrue.git.GitCommand;
+import plus.gaga.middleware.sdk.infrastructrue.ollama.impl.Ollama;
 import plus.gaga.middleware.sdk.infrastructrue.openai.IOpenAI;
 import plus.gaga.middleware.sdk.infrastructrue.openai.impl.ChatGLM;
 import plus.gaga.middleware.sdk.infrastructrue.weixin.WeiXin;
@@ -61,7 +62,10 @@ public class OpenAiCodeReview {
                 getEnv("CHATGLM_API_KEY_SECRET")
         );
 
-        OpenAiCodeReviewService openAiCodeReviewService = new OpenAiCodeReviewService(gitCommand, weixin,chatglm);
+
+        Ollama ollama = new Ollama();
+
+        OpenAiCodeReviewService openAiCodeReviewService = new OpenAiCodeReviewService(gitCommand, weixin,chatglm,ollama);
         openAiCodeReviewService.exec();
 
         logger.info("openai-code-review done!");

@@ -3,6 +3,7 @@ package plus.gaga.middleware.sdk.domain.service.impl;
 import plus.gaga.middleware.sdk.domain.model.Model;
 import plus.gaga.middleware.sdk.domain.service.AbstractOpenAiCodeReviewService;
 import plus.gaga.middleware.sdk.infrastructrue.git.GitCommand;
+import plus.gaga.middleware.sdk.infrastructrue.ollama.IOllama;
 import plus.gaga.middleware.sdk.infrastructrue.openai.IOpenAI;
 import plus.gaga.middleware.sdk.infrastructrue.openai.dto.ChatCompletionRequestDTO;
 import plus.gaga.middleware.sdk.infrastructrue.openai.dto.ChatCompletionSyncResponseDTO;
@@ -15,11 +16,10 @@ import java.util.Map;
 
 public class OpenAiCodeReviewService extends AbstractOpenAiCodeReviewService {
 
-    public OpenAiCodeReviewService(GitCommand gitCommand, WeiXin weiXin, IOpenAI iOpenAI){
-        super(weiXin,gitCommand,iOpenAI);
+    public OpenAiCodeReviewService(GitCommand gitCommand, WeiXin weiXin, IOpenAI iOpenAI, IOllama ollama){
+        super(weiXin,gitCommand,iOpenAI,ollama);
 
     }
-
     @Override
     protected void sendMessage(String logUrl) throws Exception {
         Map<String, Map<String, String>> data = new HashMap<>();
@@ -36,25 +36,54 @@ public class OpenAiCodeReviewService extends AbstractOpenAiCodeReviewService {
         return gitCommand.commitAndPush(recommend);
     }
 
-    @Override
-    protected String codeReview(String diffCode) throws Exception {
-        ChatCompletionRequestDTO chatCompletionRequestDTO = new ChatCompletionRequestDTO();
-        chatCompletionRequestDTO.setModel(Model.GLM_4_FLASH.getCode());
-        chatCompletionRequestDTO.setMessages(new ArrayList<ChatCompletionRequestDTO.Prompt>() {
-            private static final long serialVersionUID = -7988151926241837899L;
+//    @Override
+//    protected String codeReview(String diffCode) throws Exception {
+//        ChatCompletionRequestDTO chatCompletionRequestDTO = new ChatCompletionRequestDTO();
+//        chatCompletionRequestDTO.setModel(Model.GLM_4_FLASH.getCode());
+//        chatCompletionRequestDTO.setMessages(new ArrayList<ChatCompletionRequestDTO.Prompt>() {
+//            private static final long serialVersionUID = -7988151926241837899L;
+//
+//            {
+//                add(new ChatCompletionRequestDTO.Prompt("user", "你是一个高级编程架构师，精通各类场景方案、架构设计和编程语言请，请您根据git diff记录，对代码做出评审。代码如下:"));
+//                add(new ChatCompletionRequestDTO.Prompt("user", diffCode));
+//            }
+//        });
+//
+//        ChatCompletionSyncResponseDTO completions = iOpenAI.completions(chatCompletionRequestDTO);
+//        return  completions.getChoices().get(0).getMessage().getContent();
+//    }
 
-            {
-                add(new ChatCompletionRequestDTO.Prompt("user", "你是一个高级编程架构师，精通各类场景方案、架构设计和编程语言请，请您根据git diff记录，对代码做出评审。代码如下:"));
-                add(new ChatCompletionRequestDTO.Prompt("user", diffCode));
-            }
-        });
 
-        ChatCompletionSyncResponseDTO completions = iOpenAI.completions(chatCompletionRequestDTO);
-        return  completions.getChoices().get(0).getMessage().getContent();
+
+    protected String codeReview(String diffCode,String logUrl) throws Exception {
+//        ChatCompletionRequestDTO chatCompletionRequestDTO = new ChatCompletionRequestDTO();
+//        chatCompletionRequestDTO.setModel(Model.GLM_4_FLASH.getCode());
+//        chatCompletionRequestDTO.setMessages(new ArrayList<ChatCompletionRequestDTO.Prompt>() {
+//            private static final long serialVersionUID = -7988151926241837899L;
+//
+//            {
+//                add(new ChatCompletionRequestDTO.Prompt("user", "你是一个高级编程架构师，精通各类场景方案、架构设计和编程语言请，请您根据git diff记录，对代码做出评审。代码如下:"));
+//                add(new ChatCompletionRequestDTO.Prompt("user", diffCode));
+//            }
+//        });
+        String model = "deepseek-r1:1.5b";
+        String ragTag =  extractProjectName(logUrl);
+        String message = "你是一个高级编程架构师，精通各类场景方案、架构设计和编程语言请，请您根据git diff记录，对代码做出评审。代码如下:"+diffCode;
+        return ollama.generateStreamRag(model,ragTag,message);
+//        ChatCompletionSyncResponseDTO completions = iOpenAI.completions(chatCompletionRequestDTO);
+//        return  completions.getChoices().get(0).getMessage().getContent();
     }
+
 
     @Override
     protected String getDiffCode() throws Exception {
         return gitCommand.diff();
     }
+
+    private String extractProjectName(String repoUrl) {
+        String[] parts = repoUrl.split("/");
+        String projectNameWithGit = parts[parts.length - 1];
+        return projectNameWithGit.replace(".git", "");
+    }
+
 }
