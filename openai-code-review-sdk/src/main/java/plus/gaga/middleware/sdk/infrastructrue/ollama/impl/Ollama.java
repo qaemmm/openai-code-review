@@ -2,42 +2,59 @@ package plus.gaga.middleware.sdk.infrastructrue.ollama.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 import plus.gaga.middleware.sdk.infrastructrue.ollama.IOllama;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 //@Service
 public class Ollama implements IOllama {
 
     private final String OLLAMA_API_URL = "http://localhost:8090/api/v1/ollama/generate_stream";
-    private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
     public Ollama() {
-        this.restTemplate = new RestTemplate();
         this.objectMapper = new ObjectMapper();
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public String generateStreamRag(String model, String ragTag, String message) {
         StringBuilder contentBuilder = new StringBuilder();
         
-        String url = UriComponentsBuilder.fromHttpUrl(OLLAMA_API_URL)
-            .queryParam("model", model)
-            .queryParam("ragTag", ragTag)
-            .queryParam("message", message)
-            .toUriString();
-
-        ResponseEntity<Object[]> response = restTemplate.getForEntity(url, Object[].class);
-        Object[] responses = response.getBody();
-        
-        if (responses != null) {
-            for (Object chatResponse : responses) {
+        try {
+            // 构建URL with parameters
+            String encodedModel = URLEncoder.encode(model, StandardCharsets.UTF_8.toString());
+            String encodedRagTag = URLEncoder.encode(ragTag, StandardCharsets.UTF_8.toString());
+            String encodedMessage = URLEncoder.encode(message, StandardCharsets.UTF_8.toString());
+            String urlString = String.format("%s?model=%s&ragTag=%s&message=%s",
+                    OLLAMA_API_URL, encodedModel, encodedRagTag, encodedMessage);
+            
+            URL url = new URL(urlString);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            
+            // 读取响应
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String line;
+            List<String> responseLines = new ArrayList<>();
+            
+            while ((line = reader.readLine()) != null) {
+                if (!line.trim().isEmpty()) {
+                    responseLines.add(line);
+                }
+            }
+            reader.close();
+            
+            // 处理每一行响应
+            for (String responseLine : responseLines) {
                 try {
-                    JsonNode resultNode = objectMapper.valueToTree(chatResponse);
+                    JsonNode resultNode = objectMapper.readTree(responseLine);
                     JsonNode outputNode = resultNode.path("result").path("output");
                     String content = outputNode.path("content").asText("");
                     
@@ -51,9 +68,14 @@ public class Ollama implements IOllama {
                         break;
                     }
                 } catch (Exception e) {
-                    throw new RuntimeException("Error processing response", e);
+                    throw new RuntimeException("Error processing response line: " + responseLine, e);
                 }
             }
+            
+            conn.disconnect();
+            
+        } catch (Exception e) {
+            throw new RuntimeException("Error making HTTP request", e);
         }
         
         // 处理返回结果，去掉<think></think>标签
