@@ -12,8 +12,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 
 //@Service
 @Slf4j
@@ -36,13 +34,17 @@ public class Ollama implements IOllama {
 
         while (retryCount < MAX_RETRIES) {
             try {
-                String urlString = UriComponentsBuilder.fromHttpUrl(OLLAMA_API_URL)
-                        .queryParam("model", model)
-                        .queryParam("ragTag", ragTag)
-                        .queryParam("message", message)
-                        .toUriString();
+                // 替换 UriComponentsBuilder 的核心代码段
+                String encodedModel = URLEncoder.encode(model, StandardCharsets.UTF_8);
+                String encodedRagTag = URLEncoder.encode(ragTag, StandardCharsets.UTF_8);
+                String encodedMessage = URLEncoder.encode(message, StandardCharsets.UTF_8);
 
-                log.info("Requesting URL: {}", urlString);
+                String urlString = OLLAMA_API_URL
+                        + "?model=" + encodedModel
+                        + "&ragTag=" + encodedRagTag
+                        + "&message=" + encodedMessage;
+
+//                log.info("Requesting URL: {}", urlString);
 
                 URL url = new URL(urlString);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
