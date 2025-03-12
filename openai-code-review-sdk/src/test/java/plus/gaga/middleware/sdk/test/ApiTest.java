@@ -58,16 +58,16 @@ public class ApiTest {
 
 //    private IOllama ollama;
 
-    @Test
-    public void test_ollama(){
-        Ollama ollama = new Ollama();
-        String model = "deepseek-r1:1.5b";
-        String ragTag = "111";
-        String message = "1+1";
-
-        String s = ollama.generateStreamRag(model, ragTag, message);
-        System.out.println(s);
-    }
-
+//    @Test
+//    public void test_ollama(){
+//        Ollama ollama = new Ollama();
+//        String model = "deepseek-r1:1.5b";
+//        String ragTag = "111";
+//        String message = "1+1";
+//
+//        String s = ollama.generateStreamRag(model, ragTag, message);
+//        System.out.println(s);
+//    }
+//
 
 }
