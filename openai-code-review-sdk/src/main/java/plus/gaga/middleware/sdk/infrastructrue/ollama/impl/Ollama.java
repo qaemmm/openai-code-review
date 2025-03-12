@@ -16,7 +16,7 @@ import java.util.List;
 //@Service
 public class Ollama implements IOllama {
 
-    private final String OLLAMA_API_URL = "http://localhost:8090/api/v1/ollama/generate_stream";
+    private final String OLLAMA_API_URL = "http://localhost:8090/api/v1/ollama/generate_stream_rag";
     private final ObjectMapper objectMapper;
     private static final int MAX_RETRIES = 3;
     private static final int CONNECT_TIMEOUT = 5000; // 5 seconds
@@ -68,6 +68,7 @@ public class Ollama implements IOllama {
                                 String content = outputNode.path("content").asText("");
 
                                 if (!content.isEmpty()) {
+
                                     contentBuilder.append(content);
                                 }
 
