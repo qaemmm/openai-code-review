@@ -58,9 +58,9 @@ public class OpenAiCodeReview {
         );
 
         FeiShu feiShu = new FeiShu(
-                getEnv("FEISHU_APPID"),
-                getEnv("FEISHU_APPSECRET"),
-                getEnv("FEISHU_RECEIVEID")
+               "FEISHU_APPID",
+                "FEISHU_APPSECRET",
+                "FEISHU_RECEIVEID"
         );
 
 

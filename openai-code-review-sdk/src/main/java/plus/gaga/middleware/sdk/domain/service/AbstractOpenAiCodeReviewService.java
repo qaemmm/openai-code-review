@@ -31,9 +31,7 @@ public abstract class AbstractOpenAiCodeReviewService {
         sendMessage(logUrl);
     }
 
-    protected void sendMessage(String logUrl) throws Exception {
-        feiShu.sendMessage(logUrl);
-    }
+    protected abstract void sendMessage(String logUrl) throws Exception;
 
     protected abstract String getDiffCode() throws Exception;
 

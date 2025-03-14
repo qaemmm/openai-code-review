@@ -25,7 +25,7 @@ public class OpenAiCodeReviewService extends AbstractOpenAiCodeReviewService {
         TemplateMessageDTO.put(data, TemplateMessageDTO.TemplateKey.BRANCH_NAME, gitCommand.getBranch());
         TemplateMessageDTO.put(data, TemplateMessageDTO.TemplateKey.COMMIT_AUTHOR, gitCommand.getAuthor());
         TemplateMessageDTO.put(data, TemplateMessageDTO.TemplateKey.COMMIT_MESSAGE, gitCommand.getMessage());
-        feiShu.sendMessage(logUrl, data);
+        FeiShu.sendWebhookMessage("https://open.feishu.cn/open-apis/bot/v2/hook/92ed993d-cd15-4b5a-a2aa-21e9cd899134", extractProjectName(logUrl), logUrl);
     }
 
     @Override
