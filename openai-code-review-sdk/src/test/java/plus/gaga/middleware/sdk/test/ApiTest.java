@@ -97,47 +97,47 @@ public class ApiTest {
          // 保存这个chatId作为feishu_receive_id使用
     }
     
-    @Test
-    public void test_feishu_get_chat_list() throws Exception {
-         String feishu_app_id = "cli_a739ffefce64900e";
-         String feishu_app_secret = "T4jytnXOwXmnUyyzLwt7ffBnCmGvcl0s";
-         String feishu_receive_id = "oc_29a173f7a053760e4faae53721a04fd6";
-         FeiShu feishu = new FeiShu(feishu_app_id, feishu_app_secret, feishu_receive_id);
-         
-         // 获取所有群组列表
-         List<Map<String, Object>> chatList = feishu.getChatList();
-         System.out.println("群组列表:");
-         for (Map<String, Object> chat : chatList) {
-             System.out.println("群组名称: " + chat.get("name") + ", 群组ID: " + chat.get("chat_id"));
-         }
-         
-         // 从列表中选择一个群组ID作为feishu_receive_id使用
-    }
-    
-    @Test
-    public void test_feishu_send_message() throws Exception {
-         String feishu_app_id = "cli_a739ffefce64900e";
-         String feishu_app_secret = "T4jytnXOwXmnUyyzLwt7ffBnCmGvcl0s";
-         // 这里填入上面测试获取到的群组ID
-         String feishu_receive_id = "oc_29a173f7a053760e4faae53721a04fd6";
-         FeiShu feishu = new FeiShu(feishu_app_id, feishu_app_secret, feishu_receive_id);
-         
-         // 测试发送消息
-         feishu.sendMessage("https://www.baidu.com/");
-    }
-
-    @Test
-    public void test_feishu_webhook() throws Exception {
-        // 您的自定义机器人Webhook地址
-        String webhookUrl = "https://open.feishu.cn/open-apis/bot/v2/hook/92ed993d-cd15-4b5a-a2aa-21e9cd899134";
-        // 项目名称
-        String projectName = "openai-code-review";
-        // 评审结果地址
-        String logUrl = "baidu.com";
-        
-        // 发送消息
-        FeiShu.sendWebhookMessage(webhookUrl, projectName, logUrl);
-        System.out.println("消息已发送，请在飞书群组中查看");
-    }
+//    @Test
+//    public void test_feishu_get_chat_list() throws Exception {
+//         String feishu_app_id = "cli_a739ffefce64900e";
+//         String feishu_app_secret = "T4jytnXOwXmnUyyzLwt7ffBnCmGvcl0s";
+//         String feishu_receive_id = "oc_29a173f7a053760e4faae53721a04fd6";
+//         FeiShu feishu = new FeiShu(feishu_app_id, feishu_app_secret, feishu_receive_id);
+//
+//         // 获取所有群组列表
+//         List<Map<String, Object>> chatList = feishu.getChatList();
+//         System.out.println("群组列表:");
+//         for (Map<String, Object> chat : chatList) {
+//             System.out.println("群组名称: " + chat.get("name") + ", 群组ID: " + chat.get("chat_id"));
+//         }
+//
+//         // 从列表中选择一个群组ID作为feishu_receive_id使用
+//    }
+//
+//    @Test
+//    public void test_feishu_send_message() throws Exception {
+//         String feishu_app_id = "cli_a739ffefce64900e";
+//         String feishu_app_secret = "T4jytnXOwXmnUyyzLwt7ffBnCmGvcl0s";
+//         // 这里填入上面测试获取到的群组ID
+//         String feishu_receive_id = "oc_29a173f7a053760e4faae53721a04fd6";
+//         FeiShu feishu = new FeiShu(feishu_app_id, feishu_app_secret, feishu_receive_id);
+//
+//         // 测试发送消息
+//         feishu.sendMessage("https://www.baidu.com/");
+//    }
+//
+//    @Test
+//    public void test_feishu_webhook() throws Exception {
+//        // 您的自定义机器人Webhook地址
+//        String webhookUrl = "https://open.feishu.cn/open-apis/bot/v2/hook/92ed993d-cd15-4b5a-a2aa-21e9cd899134";
+//        // 项目名称
+//        String projectName = "openai-code-review";
+//        // 评审结果地址
+//        String logUrl = "baidu.com";
+//
+//        // 发送消息
+//        FeiShu.sendWebhookMessage(webhookUrl, projectName, logUrl);
+//        System.out.println("消息已发送，请在飞书群组中查看");
+//    }
 
 }
