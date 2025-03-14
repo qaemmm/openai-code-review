@@ -3,11 +3,13 @@ package plus.gaga.middleware.sdk.test;
 import com.alibaba.fastjson2.JSON;
 import org.junit.Test;
 import plus.gaga.middleware.sdk.domain.model.Message;
+import plus.gaga.middleware.sdk.domain.service.impl.OpenAiCodeReviewService;
 import plus.gaga.middleware.sdk.infrastructrue.feishu.FeiShu;
 import plus.gaga.middleware.sdk.infrastructrue.ollama.impl.Ollama;
 import plus.gaga.middleware.sdk.types.utils.BearerTokenUtils;
 import plus.gaga.middleware.sdk.types.utils.WXAccessTokenUtils;
 
+import javax.annotation.Resource;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -96,7 +98,14 @@ public class ApiTest {
          //oc_29a173f7a053760e4faae53721a04fd6
          // 保存这个chatId作为feishu_receive_id使用
     }
-    
+
+
+//    @Test
+//    public void test2(){
+//        OpenAiCodeReviewService openAiCodeReviewService = new OpenAiCodeReviewService(gitCommand, feiShu,chatglm,ollama);
+//        openAiCodeReviewService.exec();
+//    }
+
 //    @Test
 //    public void test_feishu_get_chat_list() throws Exception {
 //         String feishu_app_id = "cli_a739ffefce64900e";
