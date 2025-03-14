@@ -1,6 +1,7 @@
 package plus.gaga.middleware.sdk.domain.service.impl;
 
 import plus.gaga.middleware.sdk.domain.service.AbstractOpenAiCodeReviewService;
+import plus.gaga.middleware.sdk.infrastructrue.feishu.FeiShu;
 import plus.gaga.middleware.sdk.infrastructrue.git.GitCommand;
 import plus.gaga.middleware.sdk.infrastructrue.ollama.IOllama;
 import plus.gaga.middleware.sdk.infrastructrue.openai.IOpenAI;
@@ -12,8 +13,8 @@ import java.util.Map;
 
 public class OpenAiCodeReviewService extends AbstractOpenAiCodeReviewService {
 
-    public OpenAiCodeReviewService(GitCommand gitCommand, WeiXin weiXin, IOpenAI iOpenAI, IOllama ollama){
-        super(weiXin,gitCommand,iOpenAI,ollama);
+    public OpenAiCodeReviewService(GitCommand gitCommand, FeiShu feiShu, IOpenAI iOpenAI, IOllama ollama){
+        super(feiShu,gitCommand,iOpenAI,ollama);
 
     }
     @Override
@@ -24,7 +25,7 @@ public class OpenAiCodeReviewService extends AbstractOpenAiCodeReviewService {
         TemplateMessageDTO.put(data, TemplateMessageDTO.TemplateKey.BRANCH_NAME, gitCommand.getBranch());
         TemplateMessageDTO.put(data, TemplateMessageDTO.TemplateKey.COMMIT_AUTHOR, gitCommand.getAuthor());
         TemplateMessageDTO.put(data, TemplateMessageDTO.TemplateKey.COMMIT_MESSAGE, gitCommand.getMessage());
-        weiXin.sendTemplateMessage(logUrl,data);
+        feiShu.sendMessage(logUrl, data);
     }
 
     @Override
@@ -51,7 +52,7 @@ public class OpenAiCodeReviewService extends AbstractOpenAiCodeReviewService {
 
 
 
-    protected String codeReview(String diffCode,String logUrl) throws Exception {
+    protected String codeReview(String diffCode,String logUrl) {
 //        ChatCompletionRequestDTO chatCompletionRequestDTO = new ChatCompletionRequestDTO();
 //        chatCompletionRequestDTO.setModel(Model.GLM_4_FLASH.getCode());
 //        chatCompletionRequestDTO.setMessages(new ArrayList<ChatCompletionRequestDTO.Prompt>() {

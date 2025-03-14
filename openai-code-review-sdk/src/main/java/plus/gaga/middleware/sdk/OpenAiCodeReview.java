@@ -4,6 +4,7 @@ package plus.gaga.middleware.sdk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import plus.gaga.middleware.sdk.domain.service.impl.OpenAiCodeReviewService;
+import plus.gaga.middleware.sdk.infrastructrue.feishu.FeiShu;
 import plus.gaga.middleware.sdk.infrastructrue.git.GitCommand;
 import plus.gaga.middleware.sdk.infrastructrue.ollama.impl.Ollama;
 import plus.gaga.middleware.sdk.infrastructrue.openai.IOpenAI;
@@ -20,10 +21,9 @@ public class OpenAiCodeReview {
     private static final Logger logger = LoggerFactory.getLogger(OpenAiCodeReview.class);
 
     //配置
-    private String weixin_appid="";
-    private String weixin_secret="";
-    private String weixin_touser="";
-    private String weixin_template_id="";
+    private String feishu_app_id = "";
+    private String feishu_app_secret = "";
+    private String feishu_receive_id = "";
     // chatGLM
     private String chatglm_apiHost = "";
     private String chatglm_apiKeySecret = "";
@@ -57,6 +57,14 @@ public class OpenAiCodeReview {
                 getEnv("WEIXIN_TEMPLATE_ID")
         );
 
+        FeiShu feiShu = new FeiShu(
+                getEnv("FEISHU_APPID"),
+                getEnv("FEISHU_APPSECRET"),
+                getEnv("FEISHU_RECEIVEID")
+        );
+
+
+
         IOpenAI chatglm = new ChatGLM(
                 getEnv("CHATGLM_API_HOST"),
                 getEnv("CHATGLM_API_KEY_SECRET")
@@ -65,7 +73,7 @@ public class OpenAiCodeReview {
 
         Ollama ollama = new Ollama();
 
-        OpenAiCodeReviewService openAiCodeReviewService = new OpenAiCodeReviewService(gitCommand, weixin,chatglm,ollama);
+        OpenAiCodeReviewService openAiCodeReviewService = new OpenAiCodeReviewService(gitCommand, feiShu,chatglm,ollama);
         openAiCodeReviewService.exec();
 
         logger.info("openai-code-review done!");
