@@ -3,10 +3,10 @@ name: Build and Run OpenAlCodeReview By Main Maven Jar
 on:
   push:
     branches:
-      - 250312-gwh-rag
+      - 250313-gwh-feishu
   pull_request:
     branches:
-      - 250312-gwh-rag
+      - 250313-gwh-feishu
 
 jobs:
   build:
